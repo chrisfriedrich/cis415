@@ -203,7 +203,6 @@ int main(){
 		free_args(args, arg_count);
 	}
 	
-	int proc_status;
 	int i;
 	
 	for(i = 0; i < num_procs; i++)

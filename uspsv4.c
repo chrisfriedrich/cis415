@@ -1,6 +1,7 @@
 // Chris Friedrich - CIS 315 -- Project 1
 
-// This is my own work except for the get_process_info() function I modeled after https://github.com/DylanSecreast/uoregon-cis-415/blob/master/Projects/project1/uspsv4.c
+// This is my own work except for the get_process_info() function I modeled after the one found at
+// https://github.com/benjaminbarnes/CIS415/blob/master/Projects/Project1/uspsv4.c
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +9,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+
 #include "p1fxns.h"
 
 #define BUFFER_SIZE 1024
@@ -95,6 +99,7 @@ static void free_args(char** args, int index)
 
 static void signal_handler(int signo)
 {
+    int i;
 	if(signo == SIGUSR1)
 	{
 		signals_received++;
@@ -103,6 +108,7 @@ static void signal_handler(int signo)
 	{
 		alarms_received++;
 		
+        i = 0;
 		if(procs[i--].status == 1)
 		{
 			kill(procs[i--].pid, SIGSTOP);
@@ -143,22 +149,21 @@ static void signal_handler(int signo)
 
 void get_process_info()
 {
-	int i;
 	char buffer[BUFFER_SIZE];
 	char memory_path[BUFFER_SIZE];
 
 	char word[WORD_SIZE];
 	char pid_id[WORD_SIZE];
 	char proc[8] = "|Proc|\0";
-	char status[8] = "|Status|\0";
-	char io[8] = "|IO|\0"
+	char status[9] = "|Status|\0";
+	char io[5] = "|IO|\0";
 	char info1[8] = "|Info1|\0";
 	char info2[8] = "|Info2|\0";
 	char info3[8] = "|Info3|\0";
-	char bytes_written[8] = "|Bytes Written|\0";
-	char bytes_read[8] = "|Bytes Read|";
-	char program[8] = "|Program|";
-	char state[8] = "|State|";
+	char bytes_written[16] = "|Bytes Written|\0";
+	char bytes_read[13] = "|Bytes Read|\0";
+	char program[10] = "|Program|\0";
+	char state[8] = "|State|\0";
 
 	int p = current_process->pid;
 	
@@ -182,14 +187,14 @@ void get_process_info()
 	p1putstr(1, &(info1[0]));
 	p1putstr(1, &(pid_id[0]));
 	p1putstr(1, &(info2[0]));
-	p1putstr(1, &(program));
+	p1putstr(1, &(program[0]));
 	p1putstr(1, &(buffer[0]));
 	p1putstr(1, &(state[0]));
 
 	for (i = 0; i < BUFFER_SIZE; i++)
 	{
 		buffer[i] = '\0';
-		p1getline(return_val, buffer, BUFFER_SIZE;
+		p1getline(return_val, buffer, BUFFER_SIZE);
 		p1putstr(1, &(buffer[0]));
 	}
 
@@ -207,7 +212,7 @@ void get_process_info()
 
 	p1putstr(1, &(bytes_read[0]));
 
-	int location;
+	int location = 0;
 	location = p1getword(buffer, location, word);
 	p1getword(buffer, location, word);
 	p1putstr(1, &(word[0]));
@@ -230,7 +235,7 @@ void get_process_info()
 	p1getword(buffer, location, word);
 	p1putstr(1, &(word[0]));
 
-	p1putstr(1, &(word[0]));
+	p1putstr(1, &(info3[0]));
 }
 
 int main(){
@@ -318,7 +323,7 @@ int main(){
 		
 		if(pid < 0)
 		{
-			piperror(1, "Error. Unable to fork process.\n")
+			p1perror(1, "Error. Unable to fork process.\n");
 			free_args(args, arg_count);
 			free_procs(procs);
 			return 1;
